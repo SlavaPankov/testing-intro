@@ -2,10 +2,14 @@ function notImplemented() {
   throw new Error('Корзина ещё не реализована. Сначала прочитайте тесты.');
 }
 
-function addToCart(cart, product, quantity = 1) {
+const validateQuantity = (quantity) => {
   if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new RangeError(`Количество должно быть целым положительным числом, получено: ${quantity}`);
   }
+}
+
+function addToCart(cart, product, quantity = 1) {
+  validateQuantity(quantity);
 
   const existingItem = cart.find((item) => item.id === product.id);
   const nextQuantity = (existingItem ? existingItem.quantity : 0) + quantity;
@@ -22,7 +26,23 @@ function addToCart(cart, product, quantity = 1) {
 
   return cart.map((item) => (item.id === product.id ? { ...item, quantity: nextQuantity } : item));
 }
-function changeQuantity() { return notImplemented(); }
+function changeQuantity(cart, productId, quantity) {
+  validateQuantity(quantity);
+
+  const existingItem = cart.find((item) => item.id === productId);
+
+  if (!existingItem) {
+    return [...cart];
+  }
+
+  if (quantity > existingItem.stock) {
+    throw new RangeError(
+        `Недостаточно товара на складе: запрошено ${quantity}, доступно ${existingItem.stock}`,
+    );
+  }
+
+  return cart.map((item) => (item.id === productId ? { ...item, quantity } : item));
+}
 function removeFromCart() { return notImplemented(); }
 function calculateCartSubtotal() { return notImplemented(); }
 function calculateOrderTotal() { return notImplemented(); }
